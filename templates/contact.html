@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Contact — SilverConnect Hub{% endblock %}
+
+{% block content %}
+
+<div class="page-hero">
+  <div class="page-hero-label">Contact</div>
+  <h1 class="page-hero-title">Get in touch</h1>
+  <p class="page-hero-sub">Message our team or find help directly.</p>
+</div>
+
+<section class="section section-alt">
+  <div class="contact-grid">
+
+    <div>
+      <div class="contact-info">
+        <h3>We're here</h3>
+        <p>Seniors, family, or volunteers — we respond within 24 hours.</p>
+      </div>
+      <div class="contact-item">
+        <div class="contact-item-text">
+          <strong>Email</strong>
+          <span>hello@silverconnecthub.org</span>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-item-text">
+          <strong>Call or WhatsApp</strong>
+          <span>+92 300 000 0000</span>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-item-text">
+          <strong>Response Time</strong>
+          <span>Within 24 hours, Mon – Sat</span>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-item-text">
+          <strong>Based In</strong>
+          <span>Karachi, Pakistan</span>
+        </div>
+      </div>
+      {% if current_user %}
+      <div style="margin-top:20px;padding:18px;background:#e5f6f2;border-radius:8px;border:1px solid #388669;">
+        <p style="font-family:Arial,sans-serif;font-size:14px;font-weight:bold;color:#0a4932;margin-bottom:4px;">Want to chat with a volunteer?</p>
+        <p style="font-family:Arial,sans-serif;font-size:14px;color:#555;line-height:1.6;">
+          <a href="/helpers" style="color:#388669;font-weight:bold;text-decoration:underline;">Find a volunteer</a> and start a real-time chat.
+        </p>
+      </div>
+      {% else %}
+      <div style="margin-top:20px;padding:18px;background:#e5f6f2;border-radius:8px;border:1px solid #388669;">
+        <p style="font-family:Arial,sans-serif;font-size:14px;font-weight:bold;color:#0a4932;margin-bottom:4px;">Need direct help?</p>
+        <p style="font-family:Arial,sans-serif;font-size:14px;color:#555;line-height:1.6;">
+          <a href="/register/user" style="color:#388669;font-weight:bold;text-decoration:underline;">Create a free account</a> to chat live with volunteers.
+        </p>
+      </div>
+      {% endif %}
+    </div>
+
+    <div>
+      <div id="contactAlert" class="alert"></div>
+      <div class="form-card" style="margin:0;">
+        <h2 style="font-family:'Mooli',serif;font-size:30px;font-weight:400;color:#0a4932;margin-bottom:18px;">Send a Message</h2>
+        <form id="contactForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Your Name</label>
+              <input type="text" name="contactName" class="form-control" placeholder="Full name" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input type="email" name="contactEmail" class="form-control" placeholder="you@example.com" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">I am a...</label>
+            <select name="contactType" class="form-control">
+              <option>Senior citizen</option>
+              <option>Family member of a senior</option>
+              <option>Student / prospective volunteer</option>
+              <option>Organization or community group</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Subject</label>
+            <input type="text" name="contactSubject" class="form-control" placeholder="How can we help?" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Your Message</label>
+            <textarea name="contactMessage" class="form-control" rows="4" placeholder="Tell us more..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full" style="margin-top:6px;">Send Message</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+document.getElementById('contactForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  var btn = e.target.querySelector('[type=submit]');
+  btn.textContent = 'Sending...'; btn.disabled = true;
+  var f = e.target;
+  try {
+    var res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: f.contactName.value.trim(),
+        email: f.contactEmail.value.trim(),
+        type: f.contactType.value,
+        subject: f.contactSubject.value.trim(),
+        message: f.contactMessage.value.trim()
+      })
+    });
+    var json = await res.json();
+    var alertEl = document.getElementById('contactAlert');
+    if (json.success) {
+      alertEl.textContent = '✓ Thank you! We\'ll get back to you within 24 hours.';
+      alertEl.className = 'alert alert-success show';
+      f.reset();
+    } else {
+      alertEl.textContent = json.error || 'Failed to send. Please try again.';
+      alertEl.className = 'alert alert-error show';
+    }
+  } catch (err) {
+    document.getElementById('contactAlert').textContent = 'Network error. Please try again.';
+    document.getElementById('contactAlert').className = 'alert alert-error show';
+  }
+  btn.textContent = 'Send Message'; btn.disabled = false;
+});
+</script>
+
+{% endblock %}

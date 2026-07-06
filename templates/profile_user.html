@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}My Profile — SilverConnect Hub{% endblock %}
+
+{% block content %}
+
+<div class="page-hero">
+  <div class="page-hero-label">My Account</div>
+  <h1 class="page-hero-title">Welcome, {{ current_user.name.split()[0] }}</h1>
+  <p class="page-hero-sub">Manage your profile and chat with volunteers.</p>
+</div>
+
+<section class="section">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;max-width:1100px;margin:0 auto;">
+
+    <!-- Profile Card -->
+    <div>
+      <div class="form-card" style="max-width:100%;">
+        <div style="display:flex;align-items:center;gap:18px;margin-bottom:24px;">
+          <div class="v-card-avatar" style="width:60px;height:60px;font-size:24px;flex-shrink:0;">{{ current_user.name[0].upper() }}</div>
+          <div>
+            <h2 style="font-family:'Mooli',serif;font-size:24px;color:#0a4932;">{{ current_user.name }}</h2>
+            <span style="display:inline-block;padding:3px 12px;background:#e5f6f2;border-radius:5px;font-size:13px;font-weight:bold;color:#0a4932;">User</span>
+          </div>
+        </div>
+
+        <div id="profileView">
+          <div class="profile-info-row"><span class="profile-info-label">Email</span><span>{{ current_user.email }}</span></div>
+          <div class="profile-info-row"><span class="profile-info-label">Phone</span><span>{{ current_user.phone or '—' }}</span></div>
+          <div class="profile-info-row"><span class="profile-info-label">Neighbourhood</span><span>{{ current_user.neighborhood or '—' }}</span></div>
+          <div class="profile-info-row profile-info-bio"><span class="profile-info-label">About Me</span><span>{{ current_user.bio or 'No bio yet.' }}</span></div>
+          <button onclick="showEditForm()" class="btn btn-outline" style="margin-top:16px;">Edit Profile</button>
+        </div>
+
+        <div id="profileEdit" style="display:none;">
+          <div id="editAlert" class="alert"></div>
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" id="editName" class="form-control" value="{{ current_user.name }}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input type="text" id="editPhone" class="form-control" value="{{ current_user.phone or '' }}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Neighbourhood</label>
+            <input type="text" id="editNeighborhood" class="form-control" value="{{ current_user.neighborhood or '' }}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">About Me</label>
+            <textarea id="editBio" class="form-control" rows="3">{{ current_user.bio or '' }}</textarea>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button onclick="saveProfile()" class="btn btn-primary">Save Changes</button>
+            <button onclick="hideEditForm()" class="btn btn-outline">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px;">
+        <a href="/helpers" class="btn btn-primary btn-full" style="justify-content:center;">Find a Volunteer to Chat</a>
+      </div>
+    </div>
+
+    <!-- Chats -->
+    <div>
+      <h3 style="font-family:'Mooli',serif;font-size:26px;color:#0a4932;margin-bottom:18px;">My Conversations</h3>
+      {% if chats %}
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        {% for c in chats %}
+        <a href="/chat/room/{{ c._id }}" class="chat-preview-card">
+          <div class="v-card-avatar" style="width:44px;height:44px;font-size:18px;flex-shrink:0;">{{ c.volunteer_name[0].upper() }}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-family:'Mooli',serif;font-size:17px;color:#0a4932;">{{ c.volunteer_name }}</div>
+            {% if c.volunteer_neighborhood %}<div style="font-size:13px;color:#555;">{{ c.volunteer_neighborhood }}</div>{% endif %}
+            <div style="font-size:12px;color:#888;margin-top:2px;">{{ c.last_message_at[:10] }}</div>
+          </div>
+          <span style="color:#0a4932;font-size:20px;">&#8594;</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state" style="text-align:center;padding:40px 20px;background:#fff;border:1px solid #ddd;border-radius:8px;">
+        <div style="font-size:2.5rem;margin-bottom:12px;">💬</div>
+        <h3 style="font-family:'Mooli',serif;font-size:20px;color:#0a4932;">No conversations yet</h3>
+        <p style="font-size:15px;color:#555;margin-bottom:16px;">Find a volunteer and start a chat!</p>
+        <a href="/helpers" class="btn btn-primary">Browse Volunteers</a>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showEditForm() {
+  document.getElementById('profileView').style.display = 'none';
+  document.getElementById('profileEdit').style.display = 'block';
+}
+function hideEditForm() {
+  document.getElementById('profileEdit').style.display = 'none';
+  document.getElementById('profileView').style.display = 'block';
+}
+async function saveProfile() {
+  const data = {
+    name: document.getElementById('editName').value.trim(),
+    phone: document.getElementById('editPhone').value.trim(),
+    neighborhood: document.getElementById('editNeighborhood').value.trim(),
+    bio: document.getElementById('editBio').value.trim()
+  };
+  const res = await fetch('/profile/edit', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  });
+  const json = await res.json();
+  if (json.success) {
+    const el = document.getElementById('editAlert');
+    el.textContent = 'Profile updated successfully!';
+    el.className = 'alert alert-success show';
+    setTimeout(() => location.reload(), 1000);
+  }
+}
+</script>
+{% endblock %}

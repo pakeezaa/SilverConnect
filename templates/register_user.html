@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Sign Up — SilverConnect Hub{% endblock %}
+
+{% block content %}
+
+<div class="page-hero">
+  <div class="page-hero-label">Join Us</div>
+  <h1 class="page-hero-title">Create Your Account</h1>
+  <p class="page-hero-sub">Sign up to connect with friendly tech volunteers in your neighbourhood.</p>
+</div>
+
+<section class="section">
+  <div class="form-card" style="max-width:520px;">
+    <h2 style="font-family:'Mooli',serif;font-size:28px;color:#0a4932;margin-bottom:6px;">User Registration</h2>
+    <p style="font-family:Arial,sans-serif;font-size:15px;color:#555;margin-bottom:22px;">For people seeking tech help from volunteers.</p>
+
+    {% if error %}
+    <div class="alert alert-error show">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="/register/user">
+      <div class="form-group">
+        <label class="form-label">Full Name *</label>
+        <input type="text" name="name" class="form-control" placeholder="Your full name" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address *</label>
+        <input type="email" name="email" class="form-control" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input type="tel" name="phone" class="form-control" placeholder="Optional">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Password *</label>
+          <input type="password" name="password" class="form-control" placeholder="At least 6 characters" required minlength="6">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm Password *</label>
+          <input type="password" name="confirm_password" class="form-control" placeholder="Repeat password" required>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" style="padding:13px;margin-top:8px;">Create Account</button>
+    </form>
+
+    <p style="text-align:center;font-family:Arial,sans-serif;font-size:14px;color:#555;margin-top:20px;">
+      Already have an account? <a href="/login" style="color:#0a4932;font-weight:bold;">Login</a>
+    </p>
+    <p style="text-align:center;font-family:Arial,sans-serif;font-size:14px;color:#555;margin-top:8px;">
+      Want to volunteer? <a href="/register/volunteer" style="color:#0a4932;font-weight:bold;">Register as Volunteer</a>
+    </p>
+  </div>
+</section>
+
+{% endblock %}

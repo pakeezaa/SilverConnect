@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}About — SilverConnect Hub{% endblock %}
+
+{% block content %}
+
+<div class="page-hero">
+  <h1 class="page-hero-title">About</h1>
+  <p class="page-hero-sub">Bridging the digital divide with patience, empathy, and local connection.</p>
+</div>
+
+<section class="section section-alt">
+  <div class="about-grid">
+    <div class="about-image-wrap"><div class="hero-image">
+      <img src="{{ url_for('static', filename='images/aboutpic.png') }}" alt="">
+    </div></div>
+    <div>
+      <h2 class="section-title">A space for every generation</h2>
+      <p class="about-body-text">
+        SilverConnect Hub bridges seniors and tech-savvy students. Families easily find patient helpers nearby, while students effortlessly list their availability.
+      </p>
+      <p class="about-body-text">
+        Every connection means a senior staying in touch with grandchildren, navigating online banking independently, and regaining confidence in a digital world.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-header-center">
+    <h2 class="section-title">What we stand for</h2>
+  </div>
+
+  <div class="values-grid">
+    <div class="value-card"><div class="value-title">Patience</div><p class="value-desc">Technology help should never feel rushed. Our volunteers are selected for empathy and willingness to go at a senior's pace.</p></div>
+    <div class="value-card"><div class="value-title">Local</div><p class="value-desc">Every connection is neighbourhood-based. We believe in the power of local community and face-to-face human interaction.</p></div>
+    <div class="value-card"><div class="value-title">Free</div><p class="value-desc">Tech support through SilverConnect Hub is 100% free, always. No hidden fees, no subscriptions — just community kindness.</p></div>
+    <div class="value-card"><div class="value-title">Trust</div><p class="value-desc">We encourage families to be present during sessions and volunteers to bring a positive, respectful attitude to every interaction.</p></div>
+    <div class="value-card"><div class="value-title">Confidence</div><p class="value-desc">Our goal isn't dependency — it's confidence. We teach seniors so they can do it themselves next time.</p></div>
+    <div class="value-card"><div class="value-title">Mutual</div><p class="value-desc">Volunteers gain communication skills, service hours, and the profound satisfaction of making a real difference.</p></div>
+  </div>
+</section>
+
+<section class="section-sm">
+  <div class="cta-banner">
+    <div class="cta-banner-text">
+      <h2>Ready to start?</h2>
+      <p>Find help, or offer it. There's room for both.</p>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <a href="/helpers" class="btn btn-white">Find help</a>
+      <a href="/register/volunteer" class="btn btn-outline" style="border-color:rgba(255,255,255,.5);color:#ffffff;">Volunteer</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

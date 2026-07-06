@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}SilverConnect Hub{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mooli&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-logo">SilverConnect<span>Hub</span></a>
+  <button class="nav-toggle" onclick="toggleNav()" aria-label="Menu">&#9776;</button>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="/" class="{% if request.path == '/' %}active{% endif %}">Home</a></li>
+    <li><a href="/helpers" class="{% if request.path == '/helpers' %}active{% endif %}">Find Help</a></li>
+    <li><a href="/about" class="{% if request.path == '/about' %}active{% endif %}">About</a></li>
+    <li><a href="/contact" class="{% if request.path == '/contact' %}active{% endif %}">Contact</a></li>
+    {% if current_user %}
+      <li><a href="/profile" class="{% if request.path == '/profile' %}active{% endif %}">My Profile</a></li>
+      <li><a href="/logout" class="nav-logout">Logout ({{ current_user.name.split()[0] }})</a></li>
+    {% else %}
+      <li><a href="/login" class="{% if request.path == '/login' %}active{% endif %}">Login</a></li>
+      <li><a href="/register/user" class="nav-register btn btn-primary" style="padding:6px 16px;">Sign Up</a></li>
+    {% endif %}
+  </ul>
+</nav>
+
+{% block content %}{% endblock %}
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="footer-logo">SilverConnect<em>Hub</em></span>
+      <p>Bridging the generational gap through simple, accessible tech support.</p>
+    </div>
+    <div class="footer-links">
+      <h4>Quick Links</h4>
+      <a href="/helpers">Find a Helper</a>
+      <a href="/register/volunteer">Become a Volunteer</a>
+      <a href="/about">About Us</a>
+      <a href="/contact">Contact</a>
+    </div>
+    <div class="footer-links">
+      <h4>Account</h4>
+      {% if current_user %}
+        <a href="/profile">My Profile</a>
+        <a href="/logout">Logout</a>
+      {% else %}
+        <a href="/login">Login</a>
+        <a href="/register/user">Sign Up as User</a>
+        <a href="/register/volunteer">Sign Up as Volunteer</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2025 SilverConnect Hub. Built with care for our communities.</p>
+  </div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

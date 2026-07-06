@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Find a Helper — SilverConnect Hub{% endblock %}
+
+{% block content %}
+
+<div class="page-hero">
+  <div class="page-hero-label">Directory</div>
+  <h1 class="page-hero-title">Find a helper</h1>
+  <p class="page-hero-sub">Browse local student volunteers. Filter by area or skill.</p>
+</div>
+
+<section class="section">
+
+  <form class="filter-bar" method="GET" action="/helpers">
+    <div class="filter-group">
+      <div class="filter-label">Neighborhood</div>
+      <select name="neighborhood" class="filter-select">
+        <option value="">All areas</option>
+        {% for n in neighborhoods %}
+        <option value="{{ n }}" {% if n == selected_neighborhood %}selected{% endif %}>{{ n }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Skill Needed</div>
+      <select name="skill" class="filter-select">
+        <option value="">All skills</option>
+        {% for s in all_skills %}
+        <option value="{{ s }}" {% if s == selected_skill %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Search</button>
+    <a href="/helpers" class="btn btn-outline">Clear</a>
+  </form>
+
+  {% if not current_user %}
+  <div style="background:#e5f6f2;border:1px solid #388669;border-radius:8px;padding:14px 18px;margin-bottom:24px;font-family:Arial,sans-serif;font-size:15px;color:#0a4932;">
+    <strong>Want to chat directly with a volunteer?</strong> <a href="/login" style="color:#0a4932;font-weight:bold;text-decoration:underline;">Log in</a> or <a href="/register/user" style="color:#0a4932;font-weight:bold;text-decoration:underline;">sign up</a> to start a real-time conversation.
+  </div>
+  {% endif %}
+
+  {% if volunteers %}
+  <p style="font-family:Arial,sans-serif;font-size:16px;color:#555;margin-bottom:28px;">
+    Showing <strong>{{ volunteers|length }}</strong> volunteer{% if volunteers|length != 1 %}s{% endif %}
+    {% if selected_neighborhood %} in <strong>{{ selected_neighborhood }}</strong>{% endif %}
+    {% if selected_skill %} skilled in <strong>{{ selected_skill }}</strong>{% endif %}
+  </p>
+
+  <div class="cards-grid">
+    {% for v in volunteers %}
+    <div class="v-card">
+      <div class="v-card-avatar">{{ v.name[0].upper() }}</div>
+      <div class="v-card-name">{{ v.name }}</div>
+      <div class="v-card-neighborhood">{{ v.neighborhood }}</div>
+      <p class="v-card-bio">{{ v.bio }}</p>
+      <div class="v-card-availability">{{ v.availability }}</div>
+      <div class="skill-tags">
+        {% for s in v.skills[:3] %}<span class="skill-tag">{{ s }}</span>{% endfor %}
+        {% if v.skills|length > 3 %}<span class="skill-tag">+{{ v.skills|length - 3 }} more</span>{% endif %}
+      </div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid #dddddd;">
+        {% if current_user and current_user.role == 'user' %}
+          <a href="/chat/{{ v._id }}" class="btn btn-primary" style="width:100%;justify-content:center;">Chat with {{ v.name.split()[0] }}</a>
+        {% elif current_user and current_user.role == 'volunteer' %}
+          <span style="font-family:Arial,sans-serif;font-size:13px;color:#888;">Log in as a user to chat</span>
+        {% else %}
+          <a href="/login" class="btn btn-outline" style="width:100%;justify-content:center;">Login to Chat</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon">○</div>
+    <h3>Nothing here yet</h3>
+    <p>Try a different filter, or come back soon.</p>
+    <a href="/helpers" class="btn btn-outline" style="margin-top:20px;">Clear</a>
+  </div>
+  {% endif %}
+
+</section>
+
+<section class="section-sm section-alt">
+  <div class="cta-banner">
+    <div class="cta-banner-text">
+      <h2>Know someone great?</h2>
+      <p>Refer a student. Help us reach more seniors.</p>
+    </div>
+    <a href="/register/volunteer" class="btn btn-white btn-lg">Register as Volunteer</a>
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Login — SilverConnect Hub{% endblock %}
+
+{% block content %}
+
+<div class="page-hero">
+  <div class="page-hero-label">Welcome Back</div>
+  <h1 class="page-hero-title">Login to SilverConnect</h1>
+  <p class="page-hero-sub">Sign in to chat with volunteers or manage your listings.</p>
+</div>
+
+<section class="section">
+  <div class="form-card" style="max-width:480px;">
+    {% if error %}
+    <div class="alert alert-error show">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="/login" id="loginForm">
+      <div class="form-group">
+        <label class="form-label">I am a</label>
+        <div class="role-toggle">
+          <label class="role-option">
+            <input type="radio" name="role" value="user" checked> 
+            <span class="role-btn">User (seeking help)</span>
+          </label>
+          <label class="role-option">
+            <input type="radio" name="role" value="volunteer">
+            <span class="role-btn">Volunteer (giving help)</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" name="email" class="form-control" placeholder="you@example.com" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" placeholder="Your password" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full" style="padding:13px;margin-top:8px;">Login</button>
+    </form>
+
+    <div style="text-align:center;margin-top:24px;">
+      <p style="font-family:Arial,sans-serif;font-size:15px;color:#555;">Don't have an account?</p>
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:10px;flex-wrap:wrap;">
+        <a href="/register/user" class="btn btn-outline">Sign Up as User</a>
+        <a href="/register/volunteer" class="btn btn-outline">Sign Up as Volunteer</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
