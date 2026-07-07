@@ -20,8 +20,7 @@ users_col = db["users"]
 chats_col = db["chats"]
 chat_messages_col = db["chat_messages"]
 
-# ─── AUTH HELPERS ─────────────────────────────────────────────────────────────
-
+#AUTH HELPERS 
 def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -47,7 +46,7 @@ def get_current_user():
             u["role"] = "user"
         return u
 
-# ─── PAGES ───────────────────────────────────────────────────────────────────
+# PAGES 
 
 @app.route("/")
 def home():
@@ -90,7 +89,7 @@ def contact():
     current_user = get_current_user()
     return render_template("contact.html", volunteers=volunteers, preselect=preselect, current_user=current_user)
 
-# ─── AUTH PAGES ───────────────────────────────────────────────────────────────
+# AUTH PAGES 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -203,7 +202,7 @@ def logout():
     session.clear()
     return redirect(url_for("home"))
 
-# ─── PROFILE ──────────────────────────────────────────────────────────────────
+#  PROFILE
 
 @app.route("/profile")
 @login_required
@@ -253,7 +252,7 @@ def edit_profile():
             session["name"] = update["name"]
     return jsonify({"success": True})
 
-# ─── CHAT ─────────────────────────────────────────────────────────────────────
+#  CHAT 
 
 @app.route("/chat/<volunteer_id>")
 @login_required
@@ -325,7 +324,7 @@ def get_chat_messages(chat_id):
         m["_id"] = str(m["_id"])
     return jsonify(msgs)
 
-# ─── CONTACT API ──────────────────────────────────────────────────────────────
+# CONTACT API 
 
 @app.route("/api/contact", methods=["POST"])
 def save_contact_message():
@@ -347,7 +346,7 @@ def save_contact_message():
     general_col.insert_one(msg)
     return jsonify({"success": True}), 201
 
-# ─── SOCKET.IO ────────────────────────────────────────────────────────────────
+#SOCKET.IO 
 
 @socketio.on("join")
 def on_join(data):
