@@ -20,7 +20,11 @@ users_col = db["users"]
 chats_col = db["chats"]
 chat_messages_col = db["chat_messages"]
 
+<<<<<<< HEAD
 # AUTH HELPERS 
+=======
+#AUTH HELPERS 
+>>>>>>> 0f32fa304d6e5c52b185b9f47cf14b2b900650cb
 def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -46,7 +50,11 @@ def get_current_user():
             u["role"] = "user"
         return u
 
+<<<<<<< HEAD
 #  PAGES 
+=======
+# PAGES 
+>>>>>>> 0f32fa304d6e5c52b185b9f47cf14b2b900650cb
 
 @app.route("/")
 def home():
@@ -202,7 +210,11 @@ def logout():
     session.clear()
     return redirect(url_for("home"))
 
+<<<<<<< HEAD
 # PROFILE 
+=======
+#  PROFILE
+>>>>>>> 0f32fa304d6e5c52b185b9f47cf14b2b900650cb
 
 @app.route("/profile")
 @login_required
@@ -252,7 +264,11 @@ def edit_profile():
             session["name"] = update["name"]
     return jsonify({"success": True})
 
+<<<<<<< HEAD
 # CHAT 
+=======
+#  CHAT 
+>>>>>>> 0f32fa304d6e5c52b185b9f47cf14b2b900650cb
 
 @app.route("/chat/<volunteer_id>")
 @login_required
@@ -324,7 +340,11 @@ def get_chat_messages(chat_id):
         m["_id"] = str(m["_id"])
     return jsonify(msgs)
 
+<<<<<<< HEAD
 # CONTACT API
+=======
+# CONTACT API 
+>>>>>>> 0f32fa304d6e5c52b185b9f47cf14b2b900650cb
 
 @app.route("/api/contact", methods=["POST"])
 def save_contact_message():
@@ -346,7 +366,11 @@ def save_contact_message():
     general_col.insert_one(msg)
     return jsonify({"success": True}), 201
 
+<<<<<<< HEAD
 # SOCKET.IO 
+=======
+#SOCKET.IO 
+>>>>>>> 0f32fa304d6e5c52b185b9f47cf14b2b900650cb
 
 @socketio.on("join")
 def on_join(data):
