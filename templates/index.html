@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}SilverConnect — Tech help, made human{% endblock %}
+{% block title %}SilverConnect {% endblock %}
 
 {% block content %}
 
@@ -27,14 +27,8 @@
       SilverConnect is your welcoming space for accessible technology and digital confidence.
     </p>
     <p class="hero-desc">
-      A patient, zero-pressure environment where seniors learn everyday digital tools — with friendly guidance from local student volunteers. Break down barriers and stay beautifully connected to the people who matter most.
+      A patient, zero-pressure environment where seniors learn everyday digital tools with friendly guidance from local student volunteers. Break down barriers and stay beautifully connected to the people who matter most.
     </p>
-    {% if not current_user %}
-    <div class="hero-cta">
-      <a href="/register/user" class="btn btn-primary">Get Help</a>
-      <a href="/register/volunteer" class="btn btn-outline">Volunteer</a>
-    </div>
-    {% endif %}
   </div>
 </section>
 
@@ -62,45 +56,7 @@
   </div>
 </section>
 
-<section class="section">
-  <div class="section-header" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:20px;">
-    <div>
-      <h2 class="section-title">Our volunteers</h2>
-      <p class="section-sub">Real students from your neighbourhood.</p>
-    </div>
-    <a href="/helpers" class="btn btn-outline">View all →</a>
-  </div>
 
-  {% if volunteers %}
-  <div class="cards-grid">
-    {% for v in volunteers[:6] %}
-    <div class="v-card">
-      <div class="v-card-avatar">{{ v.name[0].upper() }}</div>
-      <div class="v-card-name">{{ v.name }}</div>
-      <div class="v-card-neighborhood">{{ v.neighborhood }}</div>
-      <p class="v-card-bio">{{ v.bio }}</p>
-      <div class="v-card-availability">{{ v.availability }}</div>
-      <div class="skill-tags">
-        {% for s in v.skills[:3] %}<span class="skill-tag">{{ s }}</span>{% endfor %}
-        {% if v.skills|length > 3 %}<span class="skill-tag">+{{ v.skills|length - 3 }}</span>{% endif %}
-      </div>
-      {% if current_user and current_user.role == 'user' %}
-      <div style="margin-top:14px;">
-        <a href="/chat/{{ v._id }}" class="btn btn-primary" style="width:100%;justify-content:center;">Chat Now</a>
-      </div>
-      {% endif %}
-    </div>
-    {% endfor %}
-  </div>
-  {% else %}
-  <div class="empty-state">
-    <div class="empty-state-icon">○</div>
-    <h3>Be the first volunteer</h3>
-    <p>No helpers listed yet. Join in.</p>
-    <a href="/register/volunteer" class="btn btn-primary" style="margin-top:16px;">Sign up</a>
-  </div>
-  {% endif %}
-</section>
 
 <section class="section-sm">
   <div class="cta-banner cta-banner-soft">
