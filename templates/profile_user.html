@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}My Profile — SilverConnect Hub{% endblock %}
+
+{% block content %}
+
+<div class="page-hero">
+  <div class="page-hero-label">My Account</div>
+  <h1 class="page-hero-title">Welcome, {{ current_user.name.split()[0] }}</h1>
+  <p class="page-hero-sub">Manage your profile and chat with volunteers.</p>
+</div>
+
+<section class="section">
+  <div class="profile-grid">
+
+    <!-- Profile Card -->
+    <div>
+      <div class="form-card" style="max-width:100%;">
+        <div class="profile-card-header">
+          <div class="v-card-avatar v-card-avatar-lg">{{ current_user.name[0].upper() }}</div>
+          <div>
+            <h2>{{ current_user.name }}</h2>
+            <span class="profile-role-badge user">User</span>
+          </div>
+        </div>
+
+        <div id="profileView">
+          <div class="profile-info-row"><span class="profile-info-label">Email</span><span>{{ current_user.email }}</span></div>
+          <div class="profile-info-row"><span class="profile-info-label">Phone</span><span>{{ current_user.phone or '—' }}</span></div>
+          <div class="profile-info-row"><span class="profile-info-label">Neighbourhood</span><span>{{ current_user.neighborhood or '—' }}</span></div>
+          <div class="profile-info-row profile-info-bio"><span class="profile-info-label">About Me</span><span>{{ current_user.bio or 'No bio yet.' }}</span></div>
+          <button onclick="showEditForm()" class="btn btn-outline" style="margin-top:16px;">Edit Profile</button>
+        </div>
+
+        <div id="profileEdit" class="hidden">
+          <div id="editAlert" class="alert"></div>
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" id="editName" class="form-control" value="{{ current_user.name }}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input type="text" id="editPhone" class="form-control" value="{{ current_user.phone or '' }}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Neighbourhood</label>
+            <input type="text" id="editNeighborhood" class="form-control" value="{{ current_user.neighborhood or '' }}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">About Me</label>
+            <textarea id="editBio" class="form-control" rows="3">{{ current_user.bio or '' }}</textarea>
+          </div>
+          <div class="profile-actions">
+            <button onclick="saveProfile('user')" class="btn btn-primary">Save Changes</button>
+            <button onclick="hideEditForm()" class="btn btn-outline">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px;">
+        <a href="/helpers" class="btn btn-primary btn-full" style="justify-content:center;">Find a Volunteer to Chat</a>
+      </div>
+    </div>
+
+    <!-- Chats -->
+    <div>
+      <h3 class="profile-column-title">My Conversations</h3>
+      {% if chats %}
+      <div class="chat-list">
+        {% for c in chats %}
+        <a href="/chat/room/{{ c._id }}" class="chat-preview-card">
+          <div class="v-card-avatar v-card-avatar-sm">{{ c.volunteer_name[0].upper() }}</div>
+          <div class="chat-preview-body">
+            <div class="chat-preview-name">{{ c.volunteer_name }}</div>
+            {% if c.volunteer_neighborhood %}<div class="chat-preview-sub">{{ c.volunteer_neighborhood }}</div>{% endif %}
+            <div class="chat-preview-date">{{ c.last_message_at[:10] }}</div>
+          </div>
+          <span class="chat-preview-arrow">&#8594;</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state-compact">
+        <div class="empty-state-icon">💬</div>
+        <h3>No conversations yet</h3>
+        <p>Find a volunteer and start a chat!</p>
+        <a href="/helpers" class="btn btn-primary">Browse Volunteers</a>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}

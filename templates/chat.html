@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Chat — SilverConnect Hub{% endblock %}
+
+{% block content %}
+
+<div class="chat-wrapper">
+  <div class="chat-header">
+    <a href="/profile" class="chat-header-back">&#8592;</a>
+    <div class="v-card-avatar v-card-avatar-sm">{{ volunteer.name[0].upper() }}</div>
+    <div>
+      <div class="chat-header-name">{{ volunteer.name }}</div>
+      {% if volunteer.neighborhood %}<div class="chat-header-neighborhood">{{ volunteer.neighborhood }}</div>{% endif %}
+    </div>
+    <div id="onlineStatus" class="chat-header-status">Connecting...</div>
+  </div>
+
+  <div class="chat-messages" id="chatMessages">
+    {% for m in messages %}
+    <div class="chat-bubble-wrap {% if m.sender_id == current_user._id %}mine{% endif %}">
+      {% if m.sender_id != current_user._id %}
+      <div class="chat-avatar-sm">{{ m.sender_name[0].upper() }}</div>
+      {% endif %}
+      <div>
+        <div class="chat-bubble {% if m.sender_id == current_user._id %}mine{% else %}theirs{% endif %}">
+          {{ m.text }}
+        </div>
+        <div class="chat-bubble-time">{{ m.sent_at[11:16] }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="chat-input-row">
+    <textarea id="messageInput" class="chat-input" placeholder="Type a message..." rows="1"></textarea>
+    <button class="chat-send-btn" onclick="sendMessage()" title="Send">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+const CHAT_ID = "{{ chat_id }}";
+const MY_ID = "{{ current_user._id }}";
+const MY_NAME = "{{ current_user.name }}";
+const MY_ROLE = "{{ current_user.role }}";
+
+const socket = io();
+const messagesDiv = document.getElementById('chatMessages');
+const input = document.getElementById('messageInput');
+const statusEl = document.getElementById('onlineStatus');
+
+socket.on('connect', () => {
+  socket.emit('join', { chat_id: CHAT_ID });
+  statusEl.textContent = 'Online';
+  statusEl.style.color = '#388669';
+});
+
+socket.on('disconnect', () => {
+  statusEl.textContent = 'Reconnecting...';
+  statusEl.style.color = '#f5a623';
+});
+
+socket.on('new_message', (msg) => {
+  appendMessage(msg);
+  scrollBottom();
+});
+
+function appendMessage(msg) {
+  const isMine = msg.sender_id === MY_ID;
+  const wrap = document.createElement('div');
+  wrap.className = 'chat-bubble-wrap' + (isMine ? ' mine' : '');
+
+  const time = msg.sent_at.substring(11, 16);
+  let html = '';
+  if (!isMine) {
+    html += `<div class="chat-avatar-sm">${msg.sender_name[0].toUpperCase()}</div>`;
+  }
+  html += `<div>
+    <div class="chat-bubble ${isMine ? 'mine' : 'theirs'}">${escapeHtml(msg.text)}</div>
+    <div class="chat-bubble-time">${time}</div>
+  </div>`;
+  wrap.innerHTML = html;
+  messagesDiv.appendChild(wrap);
+}
+
+function escapeHtml(text) {
+  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function scrollBottom() {
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+function sendMessage() {
+  const text = input.value.trim();
+  if (!text) return;
+  socket.emit('send_message', {
+    chat_id: CHAT_ID,
+    sender_id: MY_ID,
+    sender_name: MY_NAME,
+    sender_role: MY_ROLE,
+    text: text
+  });
+  input.value = '';
+  input.style.height = 'auto';
+}
+
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+input.addEventListener('input', () => {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+});
+
+scrollBottom();
+</script>
+{% endblock %}

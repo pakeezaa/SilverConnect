@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}My Profile — SilverConnect Hub{% endblock %}
+
+{% block content %}
+
+<div class="page-hero">
+  <div class="page-hero-label">Volunteer Dashboard</div>
+  <h1 class="page-hero-title">Welcome, {{ current_user.name.split()[0] }}</h1>
+  <p class="page-hero-sub">Manage your listing and respond to users needing help.</p>
+</div>
+
+<section class="section">
+  <div class="profile-grid">
+
+    <!-- Profile Card -->
+    <div>
+      <div class="form-card" style="max-width:100%;">
+        <div class="profile-card-header">
+          <div class="v-card-avatar v-card-avatar-lg">{{ current_user.name[0].upper() }}</div>
+          <div>
+            <h2>{{ current_user.name }}</h2>
+            <span class="profile-role-badge volunteer">Volunteer</span>
+          </div>
+        </div>
+
+        <div id="profileView">
+          <div class="profile-info-row"><span class="profile-info-label">Email</span><span>{{ current_user.email }}</span></div>
+          <div class="profile-info-row"><span class="profile-info-label">Phone</span><span>{{ current_user.phone or '—' }}</span></div>
+          <div class="profile-info-row"><span class="profile-info-label">Neighbourhood</span><span>{{ current_user.neighborhood or '—' }}</span></div>
+          <div class="profile-info-row"><span class="profile-info-label">Availability</span><span>{{ current_user.availability or '—' }}</span></div>
+          <div class="profile-info-row profile-info-bio"><span class="profile-info-label">Bio</span><span>{{ current_user.bio or 'No bio yet.' }}</span></div>
+          {% if current_user.skills %}
+          <div class="profile-info-row" style="flex-wrap:wrap;">
+            <span class="profile-info-label">Skills</span>
+            <div class="skill-tags">{% for s in current_user.skills %}<span class="skill-tag">{{ s }}</span>{% endfor %}</div>
+          </div>
+          {% endif %}
+          <button onclick="showEditForm()" class="btn btn-outline" style="margin-top:16px;">Edit Profile</button>
+        </div>
+
+        <div id="profileEdit" class="hidden">
+          <div id="editAlert" class="alert"></div>
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" id="editName" class="form-control" value="{{ current_user.name }}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input type="text" id="editPhone" class="form-control" value="{{ current_user.phone or '' }}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Neighbourhood</label>
+            <input type="text" id="editNeighborhood" class="form-control" value="{{ current_user.neighborhood or '' }}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Availability</label>
+            <select id="editAvailability" class="form-control">
+              <option value="">Select</option>
+              <option value="Weekdays" {% if current_user.availability == 'Weekdays' %}selected{% endif %}>Weekdays</option>
+              <option value="Weekends" {% if current_user.availability == 'Weekends' %}selected{% endif %}>Weekends</option>
+              <option value="Evenings" {% if current_user.availability == 'Evenings' %}selected{% endif %}>Evenings</option>
+              <option value="Flexible" {% if current_user.availability == 'Flexible' %}selected{% endif %}>Flexible</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Bio</label>
+            <textarea id="editBio" class="form-control" rows="3">{{ current_user.bio or '' }}</textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Skills</label>
+            <div class="checkbox-group" id="skillCheckboxes">
+              {% for skill in all_skills %}
+              <label class="checkbox-item {% if skill in (current_user.skills or []) %}checked{% endif %}">
+                <input type="checkbox" name="editSkills" value="{{ skill }}" {% if skill in (current_user.skills or []) %}checked{% endif %}>
+                {{ skill }}
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="profile-actions">
+            <button onclick="saveProfile('volunteer')" class="btn btn-primary">Save Changes</button>
+            <button onclick="hideEditForm()" class="btn btn-outline">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conversations -->
+    <div>
+      <h3 class="profile-column-title">User Conversations</h3>
+      {% if chats %}
+      <div class="chat-list">
+        {% for c in chats %}
+        <a href="/chat/room/{{ c._id }}" class="chat-preview-card">
+          <div class="v-card-avatar v-card-avatar-sm">{{ c.user_name[0].upper() }}</div>
+          <div class="chat-preview-body">
+            <div class="chat-preview-name">{{ c.user_name }}</div>
+            <div class="chat-preview-date">{{ c.last_message_at[:10] }}</div>
+          </div>
+          <span class="chat-preview-arrow">&#8594;</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state-compact">
+        <div class="empty-state-icon">💬</div>
+        <h3>No conversations yet</h3>
+        <p>Users will appear here once they start a chat with you.</p>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}
