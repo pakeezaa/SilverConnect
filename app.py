@@ -4,6 +4,7 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import certifi
 from datetime import datetime
 from functools import wraps
 
@@ -18,7 +19,9 @@ SKILL_OPTIONS = ["Smartphones", "Wi-Fi Setup", "Video Calls", "Email", "Tablets"
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/")
-client = MongoClient(MONGO_URI)
+# tlsCAFile is required on Vercel's serverless runtime — without it, PyMongo
+# can't verify Atlas's SSL certificate and every DB-touching route 500s.
+client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
 db = client["silverconnect"]
 volunteers_col = db["volunteers"]
 users_col = db["users"]
