@@ -1,10 +1,9 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from flask_socketio import SocketIO, emit, join_room, leave_room
-from pymongo import MongoClient
 from bson.objectid import ObjectId
 from werkzeug.security import generate_password_hash, check_password_hash
+import re
 import os
-import certifi
 from datetime import datetime
 from functools import wraps
 
@@ -18,15 +17,112 @@ SKILL_OPTIONS = ["Smartphones", "Wi-Fi Setup", "Video Calls", "Email", "Tablets"
 
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
-MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/")
-# tlsCAFile is required on Vercel's serverless runtime — without it, PyMongo
-# can't verify Atlas's SSL certificate and every DB-touching route 500s.
-client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
-db = client["silverconnect"]
+# ---------------------------------------------------------------------------
+# SHOWCASE MODE: in-memory mock database, no external service required.
+# Mirrors just enough of pymongo's collection interface (find, find_one,
+# insert_one, update_one, distinct, sort) for the routes below to work
+# unchanged. Data lives only in process memory, so it resets whenever the
+# serverless function cold-starts — expected for a demo deployment, not a
+# bug. Swap this block back out for a real MongoClient if you later want
+# persistence.
+# ---------------------------------------------------------------------------
+
+class MockCursor(list):
+    def sort(self, key, direction=1):
+        return MockCursor(sorted(self, key=lambda d: str(d.get(key, "")), reverse=(direction == -1)))
+
+class MockCollection:
+    def __init__(self, seed=None):
+        self._data = list(seed) if seed else []
+
+    def _match(self, doc, query):
+        for k, v in (query or {}).items():
+            if isinstance(v, dict):
+                if "$regex" in v:
+                    flags = re.IGNORECASE if "i" in v.get("$options", "") else 0
+                    if not re.search(v["$regex"], str(doc.get(k, "")), flags):
+                        return False
+                elif "$in" in v:
+                    if not any(item in doc.get(k, []) for item in v["$in"]):
+                        return False
+            elif doc.get(k) != v:
+                return False
+        return True
+
+    def find_one(self, query=None):
+        for doc in self._data:
+            if self._match(doc, query):
+                return dict(doc)
+        return None
+
+    def find(self, query=None, projection=None):
+        results = [dict(d) for d in self._data if self._match(d, query)]
+        if projection:
+            for r in results:
+                for key, include in projection.items():
+                    if include == 0:
+                        r.pop(key, None)
+        return MockCursor(results)
+
+    def insert_one(self, doc):
+        doc = dict(doc)
+        doc["_id"] = ObjectId()
+        self._data.append(doc)
+        return type("InsertResult", (), {"inserted_id": doc["_id"]})()
+
+    def update_one(self, query, update):
+        for doc in self._data:
+            if self._match(doc, query):
+                doc.update(update.get("$set", {}))
+                return
+
+    def distinct(self, field):
+        return sorted({d[field] for d in self._data if d.get(field)})
+
+class MockDB:
+    def __init__(self):
+        self._cols = {}
+    def __getitem__(self, name):
+        if name not in self._cols:
+            self._cols[name] = MockCollection()
+        return self._cols[name]
+
+db = MockDB()
 volunteers_col = db["volunteers"]
 users_col = db["users"]
 chats_col = db["chats"]
 chat_messages_col = db["chat_messages"]
+
+# Sample data so "Find Help" and "Login" have something to show immediately.
+_demo_volunteers = [
+    {"name": "Amara Khan", "email": "amara@example.com", "phone": "0300-1234567",
+     "neighborhood": "Gulshan-e-Iqbal", "availability": "Weekday evenings",
+     "bio": "Retired teacher, loves helping with smartphones and video calls.",
+     "skills": ["Smartphones", "Video Calls", "Email"],
+     "password": generate_password_hash("demo1234"), "active": True,
+     "created_at": datetime.utcnow().isoformat()},
+    {"name": "Bilal Ahmed", "email": "bilal@example.com", "phone": "0301-2345678",
+     "neighborhood": "Defence", "availability": "Weekends",
+     "bio": "IT support professional, happy to help with Wi-Fi and online banking.",
+     "skills": ["Wi-Fi Setup", "Online Banking", "Tablets"],
+     "password": generate_password_hash("demo1234"), "active": True,
+     "created_at": datetime.utcnow().isoformat()},
+    {"name": "Sana Malik", "email": "sana@example.com", "phone": "0302-3456789",
+     "neighborhood": "Clifton", "availability": "Weekday mornings",
+     "bio": "Social media enthusiast who enjoys teaching streaming apps too.",
+     "skills": ["Social Media", "Streaming", "Tablets"],
+     "password": generate_password_hash("demo1234"), "active": True,
+     "created_at": datetime.utcnow().isoformat()},
+]
+for v in _demo_volunteers:
+    volunteers_col.insert_one(v)
+
+users_col.insert_one({
+    "name": "Demo User", "email": "demo@example.com", "phone": "0300-0000000",
+    "password": generate_password_hash("demo1234"), "bio": "", "neighborhood": "",
+    "created_at": datetime.utcnow().isoformat(), "last_active": datetime.utcnow().isoformat()
+})
+# Log in with demo@example.com / demo1234 (user) or amara@example.com / demo1234 (volunteer)
 
 def login_required(f):
     @wraps(f)
