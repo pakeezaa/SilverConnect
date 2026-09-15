@@ -2,7 +2,7 @@
 #SilverConnect
 # SilverConnect
 #working link
-https://silver-connect-j3qbl6h8b-pakeezaa.vercel.app
+https://silver-connect-one.vercel.app/
 ## Overview
 SilverConnect is a web application that connects senior citizens with volunteers and caregivers, making it easier to request and provide assistance.
 
